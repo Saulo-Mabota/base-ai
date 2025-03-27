@@ -35,14 +35,8 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
             name: true,
             description: true,
             departmentId:true,
-            permissions: {
-              select: {
-                id: true,
-                name: true,
-                description: true,
-                roleId: true,
-              },
-            },
+            department:true,
+            permissions:true
           },
         },
         // role: {
@@ -52,7 +46,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
         // },
       },
     });
-    // console.log('User:', user.role);
+    console.log('role:', user.role);
     return user;
   }
 }
