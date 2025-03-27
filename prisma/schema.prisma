@@ -1,0 +1,342 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  email    String  @unique
+  username String  @unique
+  password String?
+  picture  String?
+  role     Role    @relation(fields: [roleId], references: [id])
+  roleId   String  @db.ObjectId
+
+  entityId String @db.ObjectId
+  entity   Entity @relation(fields: [entityId], references: [id], name: "EntityUsers")
+
+  customerId String?   @db.ObjectId
+  customer   Customer? @relation(fields: [customerId], references: [id], name: "customerUser")
+
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @default(now())
+
+  @@map("users")
+}
+
+// Definição do modelo de função (role)
+model Role {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  name        String  @unique
+  description String?
+  entityId    String  @db.ObjectId
+  entity      Entity  @relation(fields: [entityId], references: [id], name: "EntityRoles")
+
+  departmentId String?     @db.ObjectId
+  department   Department? @relation(fields: [departmentId], references: [id], name: "DepartmentRole")
+
+  permissions Permission[] @relation("RolePermissions")
+  Users       User[]
+  createdAt   DateTime?    @default(now())
+  updatedAt   DateTime?    @default(now())
+
+  @@map("roles")
+}
+
+// Definição do modelo de permissão
+model Permission {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  name        String  @unique
+  description String
+  isMenu      Boolean @default(false)
+  position    Int?
+
+  roleId String            @db.ObjectId
+  role   Role              @relation(fields: [roleId], references: [id], name: "RolePermissions")
+  label  LabelPermission[] @relation(name: "PermissionsLabelPermissions")
+
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @default(now())
+
+  @@map("permissions")
+}
+
+model Entity {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  name        String       @unique
+  description String
+  departments Department[] @relation("EntityDepartments")
+  users       User[]       @relation("EntityUsers")
+  categoreis  Category[]   @relation(name: "EntityCategory")
+  roles       Role[]       @relation(name: "EntityRoles")
+  coupons     Coupon[]     @relation(name: "EntityCoupon")
+  orders      Order[]      @relation(name: "EntityOrder")
+  payment     Payment[]    @relation(name: "EntityPayment")
+  Product     Product[]    @relation(name: "EntityProduct")
+
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @default(now())
+
+  @@map("entities")
+}
+
+model Department {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String
+
+  entityId String @db.ObjectId
+  entity   Entity @relation(fields: [entityId], references: [id], name: "EntityDepartments")
+
+  stock    Stock[]    @relation(name: "department_has_stock")
+  role     Role[]     @relation(name: "DepartmentRole")
+  Category Category[] @relation(name: "DepartmentCategory")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@map("departments")
+}
+
+model Category {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String?
+
+  entityId String @db.ObjectId
+  entity   Entity @relation(fields: [entityId], references: [id], name: "EntityCategory")
+
+  departmentId String?     @db.ObjectId
+  department   Department? @relation(fields: [departmentId], references: [id], name: "DepartmentCategory")
+
+  subCategories SubCategory[] @relation("CategorySubCategory")
+
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @default(now())
+
+  @@map("categories")
+}
+
+model SubCategory {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String?
+  products    Product[] @relation("SubCategoryProducts")
+
+  categoryId String   @db.ObjectId
+  category   Category @relation(fields: [categoryId], references: [id], name: "CategorySubCategory")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@map("subcategories")
+}
+
+model Product {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String
+  cover       String?
+  entityId    String  @db.ObjectId
+  entity      Entity  @relation(fields: [entityId], references: [id], name: "EntityProduct")
+
+  subCategoryId String      @db.ObjectId
+  subCategory   SubCategory @relation(fields: [subCategoryId], references: [id], name: "SubCategoryProducts")
+
+  ingredients StockHasProduct[] @relation(name: "product_has_stock")
+  OrderItem   OrderItem[]       @relation(name: "orderItem__has_product")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@map("products")
+}
+
+model Stock {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  departmentId String            @db.ObjectId
+  department   Department        @relation(fields: [departmentId], references: [id], name: "department_has_stock")
+  ingredients  StockHasProduct[] @relation(name: "stock_has_product")
+
+  name        String
+  description String
+  unity_type  String?
+  unit_price  Float?
+  quantity    Int
+  isActive    Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@map("stock")
+}
+
+model StockHasProduct {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  stockId String @db.ObjectId
+  stock   Stock  @relation(fields: [stockId], references: [id], name: "stock_has_product")
+
+  productId String  @db.ObjectId
+  product   Product @relation(fields: [productId], references: [id], name: "product_has_stock")
+
+  unity_type String?
+  quantity   Int
+
+  createdAt DateTime @default(now()) @map("createdAt")
+  updatedAt DateTime @updatedAt @map("updatedAt") // Usa @updatedAt para atualização automática
+
+  @@map("stockHasProduct")
+}
+
+model Address {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  pincode   String?
+  address   String?
+  city      String?
+  state     String?
+  country   String?
+  landmark  String?
+  lat       String?
+  long      String?
+  save_as   String     @default("Home")
+  customers Customer[] @relation(name: "AddressCustomer")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@map("addresses")
+}
+
+model Customer {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  id_number String?
+  firstName String
+  lastName  String
+  gender    String
+  born_date String?
+
+  phone_number     String
+  phone_alt_number String?
+  email            String?
+  addressId        String  @db.ObjectId
+  address          Address @relation(fields: [addressId], references: [id], name: "AddressCustomer")
+
+  orders Order[] @relation(name: "OrderCustomer")
+  User   User[]  @relation(name: "customerUser")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@map("customers")
+}
+
+model Coupon {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  code               String
+  isPercentage       Boolean
+  description        String?
+  isActive           Boolean
+  expiryDate         String
+  discount           Int       @default(0)
+  minimumOrderAmount Float     @default(0)
+  payments           Payment[] @relation(name: "paymentCoupon")
+  entityId           String    @db.ObjectId
+  entity             Entity    @relation(fields: [entityId], references: [id], name: "EntityCoupon")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@map("coupons")
+}
+
+model Order {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  customerId String   @db.ObjectId
+  customer   Customer @relation(fields: [customerId], references: [id], name: "OrderCustomer")
+
+  ref         String
+  isPayed     Boolean
+  total_price Float
+  payment     Payment[]   @relation(name: "paymentOrderItem")
+  orderItems  OrderItem[] @relation(name: "orderOrderItem")
+
+  entityId String @db.ObjectId
+  entity   Entity @relation(fields: [entityId], references: [id], name: "EntityOrder")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  orderId String @db.ObjectId
+  order   Order  @relation(fields: [orderId], references: [id], name: "orderOrderItem")
+
+  productId String  @db.ObjectId
+  product   Product @relation(fields: [productId], references: [id], name: "orderItem__has_product")
+
+  unity_type String
+  quantity   Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@map("orderitems")
+}
+
+model Payment {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  orderId  String @db.ObjectId
+  order    Order  @relation(fields: [orderId], references: [id], name: "paymentOrderItem")
+  couponId String @db.ObjectId
+  coupon   Coupon @relation(fields: [couponId], references: [id], name: "paymentCoupon")
+
+  entityId String @db.ObjectId
+  entity   Entity @relation(fields: [entityId], references: [id], name: "EntityPayment")
+
+  total_payed        Float
+  payment_mode       String
+  transactionRespAPI String?
+  transaction_id     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@map("payments")
+}
+
+model LabelPermission {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  lang        String   @default("pt")
+  title       String   @default("MenuItem")
+  icon        String?
+  link        String?
+  isHeadr     Boolean?
+  position    Int?
+  description String   @default("Menu description")
+
+  permissionId String     @db.ObjectId
+  permission   Permission @relation(fields: [permissionId], references: [id], name: "PermissionsLabelPermissions")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@map("labelpermissions")
+}
