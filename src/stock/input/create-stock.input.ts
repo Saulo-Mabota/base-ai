@@ -13,6 +13,11 @@ export class CreateStockInput {
   @IsString()
   @IsNotEmpty()
   departmentId: string;
+  
+  @Field()
+  @IsString()
+  @IsNotEmpty()
+  categoryId: string;
 
   @Field()
   @IsString()

@@ -10,8 +10,11 @@ export class CategoryPModel implements Category {
   @Field()
   name: string;
 
-  @Field()
+  @Field({ nullable: true })
   description: string;
+
+  @Field({ nullable: true })
+  type: string;
 
   @Field()
   entityId: string;

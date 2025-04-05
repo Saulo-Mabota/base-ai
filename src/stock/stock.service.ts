@@ -20,10 +20,7 @@ export class StockService {
     private readonly discoveryService: DiscoveryService,
   ) {}
 
-  async getStocks(
-    user: UserModel,
-    options: QueryStockDto = {},
-  ) {
+  async getStocks(user: UserModel, options: QueryStockDto = {}) {
     const { role } = user;
     const { skip, take, search } = options;
     const baseWhere: any = {};
@@ -31,7 +28,7 @@ export class StockService {
     if (search) {
       baseWhere.OR = [
         {
-          ref: { contains: search },
+          name: { contains: search },
         },
       ];
     }
@@ -41,10 +38,7 @@ export class StockService {
     const total = await this.prisma.stock.count({
       where: where,
     });
-    // const products = await this.prisma.departmentHasProduct.findMany({
-    //   where: where,
-    //   select: { id: true, createdAt: true },
-    // });
+   
     const products = await this.prisma.stock.findMany({
       skip: skip ? parseInt(skip) : undefined,
       take: take ? parseInt(take) : undefined,
@@ -54,16 +48,20 @@ export class StockService {
       },
       select: {
         id: true,
+        name:true,
         isActive: true,
         departmentId: true,
+        // categoryId:true,
         quantity: true,
         createdAt: true,
         unit_price: true,
         unity_type: true,
         department: true,
+        // category: true,
       },
     });
-    // console.log(products);
+
+    console.log(products);
 
     if (!products.length) {
       throw new Error('products not found');
@@ -71,36 +69,30 @@ export class StockService {
     return { products, total };
   }
 
-
-  async createStock(
-    CreateStockDto: CreateStockDto,
-    user: UserModel,
-  ) {
+  async createStock(CreateStockDto: CreateStockDto, user: UserModel) {
     try {
       const { role } = user;
       CreateStockDto.departmentId = role.departmentId;
       if (CreateStockDto.id) {
-        const existingProduct =
-          await this.prisma.stock.findUnique({
-            where: { id: CreateStockDto.id },
-          });
+        const existingProduct = await this.prisma.stock.findUnique({
+          where: { id: CreateStockDto.id },
+        });
 
         if (existingProduct) {
           const id = new ObjectId(CreateStockDto.id);
 
           console.log(CreateStockDto);
 
-          const updatedProduct =
-            await this.stock.findByIdAndUpdate(
-              id, // Passa o ID diretamente
-              {
-                $set: {
-                  ...CreateStockDto,
-                  updatedAt: new Date(),
-                },
+          const updatedProduct = await this.stock.findByIdAndUpdate(
+            id, // Passa o ID diretamente
+            {
+              $set: {
+                ...CreateStockDto,
+                updatedAt: new Date(),
               },
-              { new: true }, // Retorna o documento atualizado
-            );
+            },
+            { new: true }, // Retorna o documento atualizado
+          );
 
           return updatedProduct;
         }
@@ -122,21 +114,17 @@ export class StockService {
     }
   }
 
-  async createManyStock(
-    CreateManyStockDto: CreateManyStockDto,
-  ) {
-    const products = CreateManyStockDto.products.map(
-      (product) => {
-        return {
-          ...product,
-          quantity: parseInt(product.quantity.toString()),
-          unit_price: parseInt(product.unit_price.toString()),
-          isActive: false,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
-      },
-    );
+  async createManyStock(CreateManyStockDto: CreateManyStockDto) {
+    const products = CreateManyStockDto.products.map((product) => {
+      return {
+        ...product,
+        quantity: parseInt(product.quantity.toString()),
+        unit_price: parseInt(product.unit_price.toString()),
+        isActive: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+    });
     console.log(products);
 
     try {
@@ -152,16 +140,14 @@ export class StockService {
   async deleteStock(id: string) {
     try {
       if (id) {
-        const existingProduct =
-          await this.prisma.stock.findUnique({
-            where: { id },
-          });
+        const existingProduct = await this.prisma.stock.findUnique({
+          where: { id },
+        });
 
         if (existingProduct) {
-          const deleteProduct =
-            await this.stock.findByIdAndDelete(
-              id, // Passa o ID diretamente
-            );
+          const deleteProduct = await this.stock.findByIdAndDelete(
+            id, // Passa o ID diretamente
+          );
 
           return deleteProduct;
         }

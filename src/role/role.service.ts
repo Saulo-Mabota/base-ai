@@ -65,7 +65,7 @@ export class RoleService {
     const Role = await this.prisma.role.findMany({
       skip: skip ? parseInt(skip) : undefined,
       take: take ? parseInt(take) : undefined,
-      where: { ...baseWhere, entityId },
+      where: { ...baseWhere },
       orderBy: {
         createdAt: 'desc',
       },

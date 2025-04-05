@@ -16,6 +16,10 @@ export class QueryCategoryDto {
 
   @IsString()
   @IsOptional()
+  type?: string;
+
+  @IsString()
+  @IsOptional()
   startDate?: string;
 
   @IsString()

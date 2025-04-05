@@ -36,8 +36,6 @@ model Role {
   id          String  @id @default(auto()) @map("_id") @db.ObjectId
   name        String  @unique
   description String?
-  entityId    String
-  entity      Entity  @relation(fields: [entityId], references: [id], name: "EntityRoles")
 
   departmentId String?
   department   Department? @relation(fields: [departmentId], references: [id], name: "DepartmentRole")
@@ -75,7 +73,6 @@ model Entity {
   departments Department[] @relation("EntityDepartments")
   users       User[]       @relation("EntityUsers")
   categoreis  Category[]   @relation(name: "EntityCategory")
-  roles       Role[]       @relation(name: "EntityRoles")
   coupons     Coupon[]     @relation(name: "EntityCoupon")
   orders      Order[]      @relation(name: "EntityOrder")
   payment     Payment[]    @relation(name: "EntityPayment")
@@ -109,13 +106,14 @@ model Category {
   id          String  @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   description String?
+  type        String?
 
   entityId String
   entity   Entity @relation(fields: [entityId], references: [id], name: "EntityCategory")
 
-  departmentId String?
-  department   Department? @relation(fields: [departmentId], references: [id], name: "DepartmentCategory")
-
+  departmentId  String?
+  department    Department?   @relation(fields: [departmentId], references: [id], name: "DepartmentCategory")
+  stock         Stock[]       @relation(name: "CategoryStock")
   subCategories SubCategory[] @relation("CategorySubCategory")
 
   createdAt DateTime? @default(now())
@@ -163,6 +161,8 @@ model Stock {
 
   departmentId String            @db.ObjectId
   department   Department        @relation(fields: [departmentId], references: [id], name: "department_has_stock")
+  categoryId   String
+  category     Category          @relation(fields: [categoryId], references: [id], name: "CategoryStock")
   ingredients  StockHasProduct[] @relation(name: "stock_has_product")
 
   name        String
@@ -175,7 +175,7 @@ model Stock {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
-  @@map("stock")
+  @@map("stocks")
 }
 
 model StockHasProduct {
@@ -193,7 +193,7 @@ model StockHasProduct {
   createdAt DateTime @default(now()) @map("createdAt")
   updatedAt DateTime @updatedAt @map("updatedAt") // Usa @updatedAt para atualização automática
 
-  @@map("stockHasProduct")
+  @@map("stockhasproducts")
 }
 
 model Address {

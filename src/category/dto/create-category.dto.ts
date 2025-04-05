@@ -18,4 +18,9 @@ export class CreateCategoryDto {
   @IsString()
   @IsOptional()
   description: string;
+
+  @Field()
+  @IsString()
+  @IsOptional()
+  type: string;
 }

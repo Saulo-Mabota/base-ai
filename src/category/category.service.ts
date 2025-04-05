@@ -38,16 +38,16 @@ export class CategoryService {
 
   async getCategories(user: UserModel, options: QueryCategoryDto = {}) {
     const { role } = user;
-    const { skip, take, search } = options;
+    const { skip, take, search, type } = options;
     const baseWhere: any = {};
     let where = { ...baseWhere };
     if (search) {
       baseWhere.OR = [
         {
-          roleId: { contains: search },
+          name: { contains: search },
         },
         {
-          name: { contains: search },
+          type: { contains: type },
         },
       ];
     }
@@ -66,6 +66,7 @@ export class CategoryService {
         id: true,
         name: true,
         description: true,
+        type:true,
         entity:true
       },
     });

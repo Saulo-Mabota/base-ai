@@ -13,6 +13,9 @@ export class Stock {
   departmentId: string;
 
   @Prop({ required: true })
+  categoryId: string;
+
+  @Prop({ required: true })
   name: string;
 
   @Prop({ required: true })

@@ -23,6 +23,11 @@ export class CreateStockDto {
   @Field()
   @IsString()
   @IsNotEmpty()
+  categoryId: string;
+
+  @Field()
+  @IsString()
+  @IsNotEmpty()
   name: string;
   
   @Field()

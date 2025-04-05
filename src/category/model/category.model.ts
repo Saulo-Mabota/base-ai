@@ -13,6 +13,9 @@ export class CategoryModel implements Category {
   @Field({ nullable: true })
   description: string;
 
+  @Field({ nullable: true })
+  type: string;
+
   @Field()
   entityId: string;
 

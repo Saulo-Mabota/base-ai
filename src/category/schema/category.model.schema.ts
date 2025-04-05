@@ -14,6 +14,9 @@ export class Category {
 
   @Prop({ required: false })
   description: string;
+
+  @Prop({ required: false })
+  type: string;
   
   @Prop({ required: false })
   entityId: string;

@@ -18,5 +18,10 @@ export class CreateCategoryInput {
   @IsString()
   @IsOptional()
   description: string;
+  
+  @Field()
+  @IsString()
+  @IsOptional()
+  type: string;
 
 }

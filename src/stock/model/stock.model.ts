@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Stock } from '@prisma/client';
+import { CategoryModel } from 'src/category/model';
 import { DepartmentModel } from 'src/department/model';
 
 @ObjectType()
@@ -10,6 +11,9 @@ export class StockModel implements Stock {
 
   @Field()
   departmentId: string;
+
+  @Field()
+  categoryId: string;
 
   @Field()
   name: string;
@@ -26,11 +30,14 @@ export class StockModel implements Stock {
   @Field()
   quantity: number;
 
-  @Field({defaultValue:true})
+  @Field({ defaultValue: true })
   isActive: boolean;
 
   @Field(() => DepartmentModel)
   department: DepartmentModel;
+
+  @Field(() => CategoryModel)
+  cacategory: CategoryModel;
 
   @Field({ nullable: true })
   createdAt: Date;
