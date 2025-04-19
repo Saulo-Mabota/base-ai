@@ -159,18 +159,28 @@ model Product {
 model Stock {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  departmentId String            @db.ObjectId
-  department   Department        @relation(fields: [departmentId], references: [id], name: "department_has_stock")
-  categoryId   String
-  category     Category          @relation(fields: [categoryId], references: [id], name: "CategoryStock")
-  ingredients  StockHasProduct[] @relation(name: "stock_has_product")
+  stockId String?
+  stock   Stock?  @relation(fields: [stockId], references: [id], name: "stock_has_stock", onDelete: NoAction, onUpdate: NoAction)
+
+  isAvailable Boolean @default(false)
+
+  departmentId String     @db.ObjectId
+  department   Department @relation(fields: [departmentId], references: [id], name: "department_has_stock")
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], name: "CategoryStock")
+
+  product StockHasProduct[] @relation(name: "stock_has_product")
+  request Stock[]           @relation(name: "stock_has_stock")
 
   name        String
-  description String
+  description String?
   unity_type  String?
+  action      String?
   unit_price  Float?
   quantity    Int
-  isActive    Boolean @default(false)
+
+  isActive Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
@@ -195,6 +205,23 @@ model StockHasProduct {
 
   @@map("stockhasproducts")
 }
+
+// model RequestStock {
+//   id String @id @default(auto()) @map("_id") @db.ObjectId
+//  stockId String
+//   stock   Stock  @relation(fields: [stockId], references: [id], name: "stock_has_product")
+//  departmentId String            @db.ObjectId
+//   department   Department        @relation(fields: [departmentId], references: [id], name: "department_has_stock")
+
+//   unity_type  String?
+//   unit_price  Float?
+//   quantity    Int
+//   isActive    Boolean @default(false)
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @default(now())
+//   @@map("requeststock")
+// }
 
 model Address {
   id        String     @id @default(auto()) @map("_id") @db.ObjectId

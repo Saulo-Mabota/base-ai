@@ -8,6 +8,11 @@ export class CreateStockInput {
   @IsString()
   @IsOptional()
   id: string;
+  
+  @Field()
+  @IsString()
+  @IsOptional()
+  action: string;
 
   @Field()
   @IsString()
@@ -18,6 +23,11 @@ export class CreateStockInput {
   @IsString()
   @IsNotEmpty()
   categoryId: string;
+
+  @Field()
+  @IsString()
+  @IsOptional()
+  stockId: string;
 
   @Field()
   @IsString()

@@ -15,14 +15,20 @@ export class StockModel implements Stock {
   @Field()
   categoryId: string;
 
+  @Field({ nullable: true })
+  stockId: string;
+
   @Field()
   name: string;
 
-  @Field()
+  @Field({ nullable: true })
   description: string;
 
   @Field({ nullable: true })
   unity_type: string;
+
+  @Field({ nullable: true })
+  action: string;
 
   @Field({ nullable: true })
   unit_price: number;
@@ -33,8 +39,17 @@ export class StockModel implements Stock {
   @Field({ defaultValue: true })
   isActive: boolean;
 
+  @Field({ defaultValue: false })
+  isAvailable: boolean;
+
   @Field(() => DepartmentModel)
   department: DepartmentModel;
+
+  @Field(() => StockModel)
+  stock: StockModel;
+
+  @Field(() => [StockModel])
+  request: StockModel[];
 
   @Field(() => CategoryModel)
   cacategory: CategoryModel;

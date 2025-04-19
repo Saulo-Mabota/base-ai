@@ -17,6 +17,11 @@ export class CreateStockDto {
 
   @Field()
   @IsString()
+  @IsOptional()
+  action: string;
+
+  @Field()
+  @IsString()
   @IsNotEmpty()
   departmentId: string;
 
@@ -24,6 +29,11 @@ export class CreateStockDto {
   @IsString()
   @IsNotEmpty()
   categoryId: string;
+
+  @Field()
+  @IsString()
+  @IsOptional()
+  stockId: string;
 
   @Field()
   @IsString()

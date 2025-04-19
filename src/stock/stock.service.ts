@@ -38,7 +38,7 @@ export class StockService {
     const total = await this.prisma.stock.count({
       where: where,
     });
-   
+
     const products = await this.prisma.stock.findMany({
       skip: skip ? parseInt(skip) : undefined,
       take: take ? parseInt(take) : undefined,
@@ -48,20 +48,30 @@ export class StockService {
       },
       select: {
         id: true,
-        name:true,
+        name: true,
         isActive: true,
         departmentId: true,
-        // categoryId:true,
+        categoryId: true,
         quantity: true,
         createdAt: true,
         unit_price: true,
         unity_type: true,
         department: true,
-        // category: true,
+        stockId: true,
+        request: {
+          skip: skip ? parseInt(skip) : undefined,
+          take: take ? parseInt(take) : undefined,
+          include: {
+            product: true,
+            stock: true,
+            department:true
+          },
+        },
+        category: true,
       },
     });
 
-    console.log(products);
+    // console.log(products);
 
     if (!products.length) {
       throw new Error('products not found');
@@ -73,6 +83,8 @@ export class StockService {
     try {
       const { role } = user;
       CreateStockDto.departmentId = role.departmentId;
+      console.log(CreateStockDto);
+
       if (CreateStockDto.id) {
         const existingProduct = await this.prisma.stock.findUnique({
           where: { id: CreateStockDto.id },
@@ -80,24 +92,35 @@ export class StockService {
 
         if (existingProduct) {
           const id = new ObjectId(CreateStockDto.id);
-
-          console.log(CreateStockDto);
-
+          let result = existingProduct.quantity;
+          if (CreateStockDto.action === 'Added') {
+            result = existingProduct.quantity + CreateStockDto.quantity;
+          }
+          if (CreateStockDto.action === 'Removed') {
+            result = existingProduct.quantity - CreateStockDto.quantity;
+          }
+          if (CreateStockDto.action === 'Transferred') {
+            result = existingProduct.quantity - CreateStockDto.quantity;
+          }
           const updatedProduct = await this.stock.findByIdAndUpdate(
             id, // Passa o ID diretamente
             {
               $set: {
-                ...CreateStockDto,
+                // ...CreateStockDto,
+                quantity: result,
                 updatedAt: new Date(),
               },
             },
             { new: true }, // Retorna o documento atualizado
           );
-
-          return updatedProduct;
+          if (!CreateStockDto.stockId) {
+            return updatedProduct;
+          }
         }
-      } else {
-        // console.log(CreateStockDto);
+      }
+
+      if (CreateStockDto.stockId) {
+        console.log(CreateStockDto);
         delete CreateStockDto.id;
         const product = await this.stock.create({
           ...CreateStockDto,
@@ -125,8 +148,7 @@ export class StockService {
         updatedAt: new Date(),
       };
     });
-    console.log(products);
-
+    // console.log(products);
     try {
       const product = await this.stock.create(products);
       // product.id = product._id;

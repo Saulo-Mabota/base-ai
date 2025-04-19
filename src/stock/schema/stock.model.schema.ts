@@ -15,14 +15,20 @@ export class Stock {
   @Prop({ required: true })
   categoryId: string;
 
+  @Prop({ required: false })
+  stockId: string;
+
   @Prop({ required: true })
   name: string;
 
-  @Prop({ required: true })
+  @Prop({ required: false })
   description: string;
 
   @Prop({ required: false })
   unity_type: string;
+
+  @Prop({ required: false })
+  action: string;
 
   @Prop({ required: false })
   unit_price: number;
@@ -32,6 +38,9 @@ export class Stock {
 
   @Prop({ required: true, default: true })
   isActive: boolean;
+
+  @Prop({ required: true, default: false })
+  isAvailable: boolean;
 
   @Prop({ required: false })
   createdAt: Date;
