@@ -1,0 +1,28 @@
+* Host localhost:3000 was resolved.
+* IPv6: ::1
+* IPv4: 127.0.0.1
+*   Trying [::1]:3000...
+* Connected to localhost (::1) port 3000
+> POST /auth/login HTTP/1.1
+> Host: localhost:3000
+> User-Agent: curl/8.7.1
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 47
+> 
+} [47 bytes data]
+* upload completely sent off: 47 bytes
+< HTTP/1.1 200 OK
+< X-Powered-By: Express
+< Access-Control-Allow-Origin: *
+< Access-Control-Allow-Credentials: true
+< Content-Type: application/json; charset=utf-8
+< Content-Length: 308
+< ETag: W/"134-SdsMNj1yEgbrxu7aEpakn0Nq8EU"
+< Date: Mon, 21 Apr 2025 11:42:54 GMT
+< Connection: keep-alive
+< Keep-Alive: timeout=5
+< 
+{ [308 bytes data]
+* Connection #0 to host localhost left intact
+{"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2N2U1YzlmNmY2NDhhNWI5Y2M5ODNlZWEiLCJlbWFpbCI6ImFkbWluQG1ibS5jb20iLCJpYXQiOjE3NDUyMzU3NzQsImV4cCI6MTc0NTMyMjE3NH0.nDM_R8t9rCeVc4zxzB3p06Rd4qZS3SbSbjFg71K2w04","user":{"id":"67e5c9f6f648a5b9cc983eea","email":"admin@mbm.com","username":"Seeder"}}

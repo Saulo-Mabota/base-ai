@@ -27,6 +27,9 @@ model User {
 
   createdAt DateTime? @default(now())
   updatedAt DateTime? @default(now())
+  Order     Order[]   @relation(name: "UserOrder")
+  payment   Payment[] @relation(name: "paymentUser")
+  Stock     Stock[]   @relation(name: "UserStock")
 
   @@map("users")
 }
@@ -34,7 +37,7 @@ model User {
 // Definição do modelo de função (role)
 model Role {
   id          String  @id @default(auto()) @map("_id") @db.ObjectId
-  name        String  @unique
+  name        String
   description String?
 
   departmentId String?
@@ -51,7 +54,7 @@ model Role {
 // Definição do modelo de permissão
 model Permission {
   id          String  @id @default(auto()) @map("_id") @db.ObjectId
-  name        String  @unique
+  name        String
   description String
   isMenu      Boolean @default(false)
   position    Int?
@@ -78,8 +81,11 @@ model Entity {
   payment     Payment[]    @relation(name: "EntityPayment")
   Product     Product[]    @relation(name: "EntityProduct")
 
-  createdAt DateTime? @default(now())
-  updatedAt DateTime? @default(now())
+  createdAt   DateTime?     @default(now())
+  updatedAt   DateTime?     @default(now())
+  Table       Table[]       @relation(name: "EntityPayment")
+  SubCategory SubCategory[] @relation(name: "EntitySubCategory")
+  Customer    Customer[]    @relation(name: "EntityCustomer")
 
   @@map("entities")
 }
@@ -98,6 +104,7 @@ model Department {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
   Stock     Stock[]  @relation(name: "department_has_stock")
+  Order     Order[]  @relation(name: "DepartmentOrder")
 
   @@map("departments")
 }
@@ -131,6 +138,9 @@ model SubCategory {
   categoryId String
   category   Category @relation(fields: [categoryId], references: [id], name: "CategorySubCategory")
 
+  entityId String
+  entity   Entity @relation(fields: [entityId], references: [id], name: "EntitySubCategory")
+
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
@@ -142,11 +152,13 @@ model Product {
   name        String
   description String
   cover       String?
+  price       Float?
+  quantity    Int?
   entityId    String
   entity      Entity  @relation(fields: [entityId], references: [id], name: "EntityProduct")
 
-  subCategoryId String
-  subCategory   SubCategory       @relation(fields: [subCategoryId], references: [id], name: "SubCategoryProducts")
+  subCategoryId String?
+  subCategory   SubCategory?      @relation(fields: [subCategoryId], references: [id], name: "SubCategoryProducts")
   orderItem     OrderItem[]       @relation(name: "orderItem_has_product")
   ingredients   StockHasProduct[] @relation(name: "product_has_stock")
 
@@ -167,18 +179,23 @@ model Stock {
   departmentId String     @db.ObjectId
   department   Department @relation(fields: [departmentId], references: [id], name: "department_has_stock")
 
-  categoryId String
-  category   Category @relation(fields: [categoryId], references: [id], name: "CategoryStock")
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id], name: "CategoryStock")
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], name: "UserStock")
 
   product StockHasProduct[] @relation(name: "stock_has_product")
   request Stock[]           @relation(name: "stock_has_stock")
 
-  name        String
-  description String?
-  unity_type  String?
-  action      String?
-  unit_price  Float?
-  quantity    Int
+  name         String
+  description  String?
+  unity_type   String?
+  action       String?
+  unit_price   Float?
+  quantity     Float?
+  min_quantity Float?
+  brand        String?
 
   isActive Boolean @default(false)
 
@@ -198,7 +215,7 @@ model StockHasProduct {
   product   Product @relation(fields: [productId], references: [id], name: "product_has_stock")
 
   unity_type String?
-  quantity   Int
+  quantity   Float
 
   createdAt DateTime @default(now()) @map("createdAt")
   updatedAt DateTime @updatedAt @map("updatedAt") // Usa @updatedAt para atualização automática
@@ -253,9 +270,16 @@ model Customer {
 
   phone_number     String
   phone_alt_number String?
+  type             String?
+  nuit             String?
+  website          String?
+  location         String?
   email            String?
-  addressId        String
-  address          Address @relation(fields: [addressId], references: [id], name: "AddressCustomer")
+  addressId        String?
+  address          Address? @relation(fields: [addressId], references: [id], name: "AddressCustomer")
+
+  entityId String
+  entity   Entity @relation(fields: [entityId], references: [id], name: "EntityCustomer")
 
   orders Order[] @relation(name: "OrderCustomer")
   User   User[]  @relation(name: "customerUser")
@@ -291,15 +315,23 @@ model Order {
 
   customerId String
   customer   Customer @relation(fields: [customerId], references: [id], name: "OrderCustomer")
+  entityId   String
+  entity     Entity   @relation(fields: [entityId], references: [id], name: "EntityOrder")
 
-  ref         String
-  isPayed     Boolean
-  total_price Float
-  payment     Payment[]   @relation(name: "paymentOrderItem")
-  orderItems  OrderItem[] @relation(name: "orderOrderItem")
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id], name: "DepartmentOrder")
 
-  entityId String
-  entity   Entity @relation(fields: [entityId], references: [id], name: "EntityOrder")
+  userId String
+  user   User   @relation(fields: [userId], references: [id], name: "UserOrder")
+
+  ref            String
+  typeOrder      String //dine in
+  status         String // pending
+  isPayed        Boolean
+  total_price    Float
+  payment        Payment[]        @relation(name: "paymentOrderItem")
+  orderItems     OrderItem[]      @relation(name: "orderOrderItem")
+  TablesHasOrder TablesHasOrder[] @relation(name: "orderTables")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
@@ -313,11 +345,13 @@ model OrderItem {
   orderId String
   order   Order  @relation(fields: [orderId], references: [id], name: "orderOrderItem")
 
-  productId String
-  product   Product @relation(fields: [productId], references: [id], name: "orderItem_has_product")
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id], name: "orderItem_has_product")
 
-  unity_type String
-  quantity   Int
+  unity_type  String?
+  quantity    Int
+  description String?
+  unit_price  Float?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
@@ -329,14 +363,18 @@ model Payment {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
   orderId  String
-  order    Order  @relation(fields: [orderId], references: [id], name: "paymentOrderItem")
-  couponId String
-  coupon   Coupon @relation(fields: [couponId], references: [id], name: "paymentCoupon")
+  order    Order   @relation(fields: [orderId], references: [id], name: "paymentOrderItem")
+  couponId String?
+  coupon   Coupon? @relation(fields: [couponId], references: [id], name: "paymentCoupon")
 
   entityId String
   entity   Entity @relation(fields: [entityId], references: [id], name: "EntityPayment")
 
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], name: "paymentUser")
+
   total_payed        Float
+  exchange           Float
   payment_mode       String
   transactionRespAPI String?
   transaction_id     String?
@@ -365,4 +403,38 @@ model LabelPermission {
   updatedAt DateTime @default(now())
 
   @@map("labelpermissions")
+}
+
+model Table {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String?
+  customers   Int
+
+  entityId String
+  entity   Entity @relation(fields: [entityId], references: [id], name: "EntityPayment")
+
+  TablesHasOrder TablesHasOrder[] @relation(name: "TablesOrdes")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@map("tables")
+}
+
+model TablesHasOrder {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], name: "orderTables")
+
+  tableId String
+  table   Table  @relation(fields: [tableId], references: [id], name: "TablesOrdes")
+
+  guess Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@map("tableshasorder")
 }
