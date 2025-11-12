@@ -22,13 +22,49 @@ export class OrderService {
   ) {}
 
   async getOrder(id: string) {
-    const entity = await this.prisma.order.findUnique({
+    const entity = await this.prisma.order.findFirst({
       where: {
-        id,
+        ref:id
       },
       select: {
-        id: true,
+      id: true,
+        customer: true,
         isPayed: true,
+        createdAt: true,
+        typeOrder: true,
+        ref: true,
+        total_price: true,
+        userId: true,
+        departmentId: true,
+        user: true,
+        status: true,
+        entity: {
+          select: {
+            name: true,
+          },
+        },
+        orderItems: {
+          select: {
+            id: true,
+            description: true,
+            createdAt: true,
+            product: {
+              include: {
+                subCategory: {
+                  select: {
+                    category: {
+                      select: {
+                        name: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            unit_price: true,
+            quantity: true,
+          },
+        },
       },
     });
     if (!entity) {
@@ -131,7 +167,7 @@ export class OrderService {
         ref: true,
         total_price: true,
         userId: true,
-        departmentId:true,
+        departmentId: true,
         user: true,
         status: true,
         entity: {
@@ -172,6 +208,13 @@ export class OrderService {
   async createOrder(createOrderDto: CreateOrderDto, user: UserModel) {
     try {
       // console.log("createOrderDto",createOrderDto);
+      const checkOrder = await this.order.findOneAndDelete({
+        ref: createOrderDto.ref,
+      });
+      if (checkOrder) {
+        await this.orderItem.deleteMany({ orderId: checkOrder._id });
+        // console.log(checkOrder);
+      }
 
       const order = await this.order.create({
         entityId: user.role.department.entityId,
@@ -187,7 +230,7 @@ export class OrderService {
         ),
         typeOrder: createOrderDto.typeOrder,
         // description: createOrderDto.description
-        createdAt: new Date(),
+        createdAt: checkOrder ? checkOrder.createdAt : new Date(),
         updatedAt: new Date(),
       });
       order.id = order._id;
@@ -202,6 +245,7 @@ export class OrderService {
           updatedAt: new Date(),
         };
       });
+
       await this.orderItem.insertMany(createOrderItemDto);
       delete order._id;
       const orderData = await this.prisma.order.findFirst({
@@ -275,6 +319,7 @@ export class OrderService {
       throw error;
     }
   }
+  
   async deleteOrderItem(id: string) {
     try {
       if (id) {

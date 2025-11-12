@@ -27,7 +27,6 @@ import { PaymentModule } from './payment/payment.module';
 import { OrderModule } from './orders/orders.module';
 import { StockModule } from './stock/stock.module';
 import { StockHasProductModule } from './stockHasProduct/stockHasProduct.module';
-import { BulkInserterModule } from './bulk-inserter/bulk-inserter.module';
 
 const config = new ConfigService()
 @Module({
@@ -61,8 +60,7 @@ const config = new ConfigService()
     OrderModule,
     PaymentModule,
     StockModule,
-    StockHasProductModule,
-    BulkInserterModule
+    StockHasProductModule
   ],
   controllers: [AppController],
   providers: [

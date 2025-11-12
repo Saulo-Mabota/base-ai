@@ -1,0 +1,46 @@
+                git branch dev-saulo
+                git checkout dev-saulo
+                yarn start:dev
+
+                npx prisma generate
+                git pull origin dev-artur    
+
+
+                git add .
+                git commit -m "passos de bebe"
+                git pull origin dev-artur -  BACKEND
+
+                git pull origin main  - FRONT END
+
+
+                # Write your query or mutamutaiontion here
+mutation{
+#seederCreateRole{name} 
+# seederCreatePermissions{
+#     id
+#     name
+#   }
+#seederCreateUser{username} 
+#seederCreateRole{name}
+  login(loginInput:{
+   email:"admin@mbm.com"
+    password:"12345678"
+  }){
+    user{
+      id
+     }
+     access_token
+   }
+}
+
+
+
+
+read-app
+list-users
+list-role
+list-department
+list-category
+list-subcategory
+list-product
+list-stock
