@@ -1,19 +1,10 @@
-                git branch dev-saulo
-                git checkout dev-saulo
+
                 yarn start:dev
-
+                yarn dev
                 npx prisma generate
-                git pull origin dev-artur    
+         
 
-
-                git add .
-                git commit -m "passos de bebe"
-                git pull origin dev-artur -  BACKEND
-
-                git pull origin main  - FRONT END
-
-
-                # Write your query or mutamutaiontion here
+ # Write your query or mutamutaiontion here
 mutation{
 #seederCreateRole{name} 
 # seederCreatePermissions{
@@ -33,9 +24,6 @@ mutation{
    }
 }
 
-
-
-
 read-app
 list-users
 list-role
@@ -44,3 +32,25 @@ list-category
 list-subcategory
 list-product
 list-stock
+
+git branch // Show all branches
+git branch -a // Show all branches (local and remote)
+git status // Show the status of your working directory
+
+WORKING ON YOUR BRANCH (DEV-SAULO):
+1.	git add .
+2.	git commit -m "Short, meaningful message"
+3.	git push origin dev-saulo
+UPDATING YOUR BRANCH FROM MAIN:
+1.	git checkout main
+2.	git pull origin main
+3.	git checkout dev-saulo
+4.	git merge main
+UPDATING THE MAIN BRANCH:
+1.	git checkout main
+2.	git pull origin main
+
+
+git checkout -b dev-saulo // Create a new branch called dev-saulo
+git push origin dev-saulo // Feed the new branch to the remote repository
+
